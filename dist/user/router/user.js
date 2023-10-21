@@ -18,28 +18,19 @@ const auth_1 = __importDefault(require("../middleware/auth"));
 const user_1 = __importDefault(require("../controllers/user"));
 exports.userRouter = (0, express_1.Router)();
 //testing purpose
-exports.userRouter.get('', (req, res) => {
-    res.send('User router is working');
+exports.userRouter.get("", (req, res) => {
+    res.send("User router is working");
 });
-//create user 
-exports.userRouter.post('/create', user_1.default.createUser);
+//create user
+exports.userRouter.post("/create", user_1.default.createUser);
 //login user
-exports.userRouter.post('/login', user_1.default.loginUser);
-// userRouter.get('/admin-only', auth, checkRole(['ADMIN']), async (req: JwtRequest, res: Response) => {
-//     res.status(200).json({ message: 'This can only be accessed by admins' });
-// });
-// userRouter.get('/admin-and-staff', auth, checkRole(['ADMIN', 'STAFF']), async (req: JwtRequest, res: Response) => {
-//     res.status(200).json({ message: 'This can only be accessed by admins and teachers' });
-// });
-// userRouter.get('/admin-staff-students', auth, checkRole(['ADMIN', 'STAFF', 'STUDENT']), async (req: JwtRequest, res: Response) => {
-//     res.status(200).json({ message: 'This can only be accessed by admins, teachers and students' });
-// });
-//logout user 
-exports.userRouter.post('/logout', auth_1.default, user_1.default.logout);
-//logout all token 
-exports.userRouter.post('/logoutall', auth_1.default, user_1.default.logoutall);
+exports.userRouter.post("/login", user_1.default.loginUser);
+//logout user
+exports.userRouter.post("/logout", auth_1.default, user_1.default.logout);
+//logout all token
+exports.userRouter.post("/logoutall", auth_1.default, user_1.default.logoutall);
 //getting user data
-exports.userRouter.get('/me', auth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.userRouter.get("/me", auth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     res.send(req.user);
 }));
 //# sourceMappingURL=user.js.map

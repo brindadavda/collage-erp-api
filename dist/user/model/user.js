@@ -54,42 +54,56 @@ exports.UserSchema = new mongoose_1.Schema({
     role: {
         type: String,
         require: true,
-        uppercase: true
+        uppercase: true,
     },
-    tokens: [{
+    tokens: [
+        {
             token: {
-                type: String
-            }
-        }],
+                type: String,
+            },
+        },
+    ],
 }, {
-    timestamps: true
+    timestamps: true,
 });
 //adding password hasing
-exports.UserSchema.pre('save', function (next) {
+exports.UserSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
-        const user = this;
-        if (user.isModified('password')) {
-            user.password = yield bcrypt.hash(user.password, 8);
+        if (this.isModified("password")) {
+            this.password = yield bcrypt.hash(this.password, 8);
         }
         next();
     });
 });
+//finding user by email , role , password
+exports.UserSchema.statics.findUser = function (email, role, password) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const user = yield exports.UserModel.findOne({ email, role });
+        if (!user) {
+            return;
+        }
+        const isMatch = yield bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return;
+        }
+        return user;
+    });
+};
 // Generate a JWT token for the user
 exports.UserSchema.methods.generateAuthToken = function () {
     return __awaiter(this, void 0, void 0, function* () {
         const user = this; // Cast to User type
-        const token = jsonwebtoken_1.default.sign({ _id: user._id, role: user.role }, process.env.JWT_SECRET || 'secret'); // Replace 'your-secret-key' with your actual secret key
+        const token = jsonwebtoken_1.default.sign({ _id: user._id, role: user.role }, process.env.JWT_SECRET || "secret"); // Replace 'your-secret-key' with your actual secret key
         user.tokens = user.tokens || [];
         return token;
     });
 };
 //we don't share the password and token
 exports.UserSchema.methods.toJSON = function () {
-    const user = this;
-    const UserObject = user.toObject();
+    const UserObject = this.toObject();
     delete UserObject.password;
     delete UserObject.tokens;
     return UserObject;
 };
-exports.UserModel = (0, mongoose_1.model)('User', exports.UserSchema, 'user');
+exports.UserModel = (0, mongoose_1.model)("User", exports.UserSchema, "user");
 //# sourceMappingURL=user.js.map

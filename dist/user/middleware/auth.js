@@ -14,20 +14,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const user_1 = require("../model/user");
-;
 const auth = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const authHeader = req.headers.authorization;
     //auth header null
     if (!authHeader) {
-        return res.status(401).json('No authorization header found');
+        return res.status(401).json("No authorization header found");
     }
     //getting token from header
-    const token = authHeader.split(' ')[1];
-    console.log(token);
-    //verify the token 
+    const token = authHeader.split(" ")[1];
+    //verify the token
     try {
-        const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET || 'secret');
-        const user = yield user_1.UserModel.findOne({ _id: decoded._id, "tokens.token": token });
+        const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET || "secret");
+        const user = yield user_1.UserModel.findOne({
+            _id: decoded._id,
+            "tokens.token": token,
+        });
         if (!user) {
             throw new Error();
         }
@@ -37,7 +38,7 @@ const auth = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () 
         next();
     }
     catch (err) {
-        return res.status(401).json('Invalid token');
+        return res.status(401).json("Invalid token");
     }
 });
 exports.default = auth;

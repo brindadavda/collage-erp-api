@@ -22,12 +22,14 @@ class UserController {
                 const userData = req.body;
                 //if data not getting from req.body
                 if (Object.keys(userData).length == 0) {
-                    return res.send('Please provide user details');
+                    return res.send("Please provide user details");
                 }
-                const findUser = yield user_1.UserModel.findOne({ email: req.body.email, role: req.body.role });
-                console.log(findUser);
+                const findUser = yield user_1.UserModel.findOne({
+                    email: req.body.email,
+                    role: req.body.role,
+                });
                 if (findUser) {
-                    return res.status(400).send('User already created');
+                    return res.status(400).send("User already created");
                 }
                 // Create a new instance of UserModel
                 const user = new user_1.UserModel(userData);
@@ -37,7 +39,7 @@ class UserController {
             }
             catch (error) {
                 console.error(error);
-                res.status(500).send('Internal server error');
+                res.status(500).send("Internal server error");
             }
         });
     }
@@ -45,16 +47,15 @@ class UserController {
     static loginUser(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                // Find user by email & role
-                const foundUser = yield user_1.UserModel.findOne({ email: req.body.email, role: req.body.role });
+                // Find user by email & role & passsword
+                const foundUser = yield user_1.UserModel.findUser(req.body.email, req.body.role);
                 if (!foundUser) {
-                    return res.send('Email not found Or Role not found');
+                    return res.send("Email not found Or Role not found");
                 }
                 //if password no provided
                 if (!req.body.password) {
-                    return res.send('Password not found');
+                    return res.send("Password not found");
                 }
-                ;
                 const isMatch = yield bcryptjs_1.default.compare(req.body.password, foundUser.password);
                 if (isMatch) {
                     // Generate a JWT token for the user
@@ -64,24 +65,23 @@ class UserController {
                     res.status(200).send({ user: foundUser, token });
                 }
                 else {
-                    return res.status(400).send('Invalid password');
+                    return res.status(400).send("Invalid password");
                 }
             }
             catch (error) {
                 console.error(error);
-                return res.status(500).send('Internal server error');
+                return res.status(500).send("Internal server error");
             }
         });
     }
     //logout user
     static logout(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('logout');
             try {
                 req.user.tokens = req.user.tokens.filter((token) => token.token !== req.token);
                 console.log(req.user);
                 yield req.user.save();
-                res.send('Successfully Logout');
+                res.send("Successfully Logout");
             }
             catch (e) {
                 res.status(500).send(e.toString());
@@ -94,7 +94,7 @@ class UserController {
             try {
                 req.user.tokens = [];
                 yield req.user.save();
-                res.status(200).send('Logout All');
+                res.status(200).send("Logout All");
             }
             catch (e) {
                 res.status(500).send(e.toString());
