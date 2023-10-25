@@ -1,8 +1,20 @@
+
+/* eslint-disable */
 import express from "express";
+
+/* eslint-disable */
 import "./db/mongooseConn";
+import { logger } from "./utils/log"
+
+/* eslint-disable */
 import { userRouter } from "./user/user.router";
+
+/* eslint-disable */
 import { studentRouter } from "./student/student.router";
-import { analyticsRouter } from "./Analytics/analytics.router";
+
+/* eslint-disable */
+import { analyticsRouter } from "./Attendance/attendance.router";
+
 
 const app: express.Application = express();
 
@@ -12,8 +24,9 @@ app.use(express.json());
 //set all the routers
 app.use("/user", userRouter);
 app.use("/student", studentRouter);
-app.use("/analytics", analyticsRouter);
+app.use("/attendance", analyticsRouter);
 
 app.listen(port, "0.0.0.0", () => {
+  logger.info(`server running on localhost:${port}`);
   console.log(`server is running on localhost:${port}`);
 });

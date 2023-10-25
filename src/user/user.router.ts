@@ -1,12 +1,15 @@
+/* eslint-disable */
 import { Request, Response, Router } from "express";
-import auth from "./user.middleware";
-import { JwtRequest } from "./user.middleware";
+import auth from "../utils/auth";
+import { JwtRequest } from "../utils/auth";
 import UserController from "./user.controllers";
+import { logger } from "utils/log";
 
 export const userRouter: Router = Router();
 
 //testing purpose
 userRouter.get("", (req: Request, res: Response) => {
+  
   res.send("User router is working");
 });
 

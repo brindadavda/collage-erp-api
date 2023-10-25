@@ -1,4 +1,6 @@
+/* eslint-disable */
 import { Schema, model } from "mongoose";
+import validator from "validator";
 
 //creating interface for student
 export interface I_Student {
@@ -7,14 +9,23 @@ export interface I_Student {
   department: string;
   batch: number;
   current_sem: number;
+  attendanceId : object
 }
 
 export const StudentSchema = new Schema<I_Student>({
   name: {
     type: String,
     required: true,
+    trim: true,
+},
+  phone_number: {
+    type : Number,
+    validate(value : Number) {
+      if (!validator.isMobilePhone(value.toString())) {
+          throw new Error('Phone number is invalid');
+      }
+  }
   },
-  phone_number: Number,
   department: {
     type: String,
     required: true,
@@ -26,6 +37,10 @@ export const StudentSchema = new Schema<I_Student>({
   current_sem: {
     type: Number,
     required: true,
+  },
+  attendanceId: {
+    type : Object,
+    ref : 'batches'
   },
 });
 

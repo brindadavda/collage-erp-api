@@ -1,5 +1,8 @@
+/* eslint-disable */
 import { Request, Response } from "express";
-import { JwtRequest } from "../user/user.middleware";
+/* eslint-disable */
+import { JwtRequest } from "../utils/auth";
+/* eslint-disable */
 import { checkRole } from "./student.middleware";
 import { StudentModel } from "./student.model";
 

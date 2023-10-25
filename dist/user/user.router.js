@@ -1,20 +1,12 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.userRouter = void 0;
+/* eslint-disable */
 const express_1 = require("express");
-const user_middleware_1 = __importDefault(require("./user.middleware"));
+const auth_1 = __importDefault(require("../utils/auth"));
 const user_controllers_1 = __importDefault(require("./user.controllers"));
 exports.userRouter = (0, express_1.Router)();
 //testing purpose
@@ -26,11 +18,10 @@ exports.userRouter.post("/create", user_controllers_1.default.createUser);
 //login user
 exports.userRouter.post("/login", user_controllers_1.default.loginUser);
 //logout user
-exports.userRouter.post("/logout", user_middleware_1.default, user_controllers_1.default.logout);
+exports.userRouter.post("/logout", auth_1.default, user_controllers_1.default.logout);
 //logout all token
-exports.userRouter.post("/logoutall", user_middleware_1.default, user_controllers_1.default.logoutall);
+exports.userRouter.post("/logoutall", auth_1.default, user_controllers_1.default.logoutall);
 //getting user data
-exports.userRouter.get("/me", user_middleware_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.userRouter.get("/me", auth_1.default, async (req, res) => {
     res.send(req.user);
-}));
-//# sourceMappingURL=user.router.js.map
+});

@@ -8,4 +8,3 @@ function checkRole(role) {
     return false;
 }
 exports.checkRole = checkRole;
-//# sourceMappingURL=student.middleware.js.map

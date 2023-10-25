@@ -1,8 +1,16 @@
+/* eslint-disable */
 import { Router } from "express";
-import auth from "../user/user.middleware";
+/* eslint-disable */
+import auth from "../utils/auth";
+/* eslint-disable */
 import StudentController from "./student.controllers";
 
 export const studentRouter: Router = Router();
+
+import { StudentDataGenerate } from "./student.datagenrate";
+
+//adding the dummy data
+studentRouter.post('/add_dummy_data',StudentDataGenerate);
 
 //create a student data
 studentRouter.post("/create", auth, StudentController.createStudent);

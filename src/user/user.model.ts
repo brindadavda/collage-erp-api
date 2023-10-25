@@ -1,7 +1,9 @@
+/* eslint-disable */
 import { model, Schema, Document, Model } from "mongoose";
 import * as bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { JwtRequest } from "./user.middleware";
+import { JwtRequest } from "../utils/auth";
+import validator from "validator";
 
 export interface I_User extends Document {
   name?: string;
@@ -23,22 +25,44 @@ interface I_User_Methods {
 
 // Create a new Model type that knows about IUserMethods...
 interface I_User_Static_Methods extends Model<I_User, I_User_Methods> {
-  findUser(email: string, role: JwtRequest , password : String): Promise<I_User & I_User_Methods>;
+  findUser(
+    email: string,
+    role: JwtRequest,
+    password: string,
+  ): Promise<I_User & I_User_Methods>;
 }
 
 export const UserSchema: Schema = new Schema<I_User, I_User_Static_Methods>(
   {
-    name: String,
-    email: {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+  },
+  email: {
       type: String,
       unique: true,
-      require: true,
+      required: true,
       lowercase: true,
-    },
-    password: {
+      trim: true,
+      validate(value : string) {
+          if (!validator.isEmail(value)) {
+              throw new Error('Email is invalid');
+          }
+      }
+  },
+  password: {
       type: String,
-      require: true,
-    },
+      required: true,
+      unique: true,
+      trim: true,
+      minlength: 7,
+      validate(value : string) {
+          if (value.toLowerCase().includes('password')) {
+              throw new Error('password can not contain password');
+          }
+      }
+  },
     role: {
       type: String,
       require: true,
@@ -67,26 +91,19 @@ UserSchema.pre("save", async function (next) {
 });
 
 //finding user by email , role , password
-UserSchema.statics.findUser = async function (email, role , password) {
-  console.log('line 71 from user model');
-  console.log(email , role , password);
+UserSchema.statics.findUser = async function (email, role, password) {
   const user = await UserModel.findOne({ email, role });
 
   if (!user) {
-    return 'User Not found';
+    return "User Not found";
   }
-
-  console.log(password, user.password);
-
 
   const isMatch = await bcrypt.compare(password, user.password);
 
-  
   if (!isMatch) {
-    return 'Password dos not workable';
+    return "Password dos not workable";
   }
 
-  
   return user;
 };
 

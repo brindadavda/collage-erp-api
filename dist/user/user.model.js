@@ -22,34 +22,45 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserModel = exports.UserSchema = void 0;
+/* eslint-disable */
 const mongoose_1 = require("mongoose");
 const bcrypt = __importStar(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const validator_1 = __importDefault(require("validator"));
 exports.UserSchema = new mongoose_1.Schema({
-    name: String,
+    name: {
+        type: String,
+        required: true,
+        trim: true,
+    },
     email: {
         type: String,
         unique: true,
-        require: true,
+        required: true,
         lowercase: true,
+        trim: true,
+        validate(value) {
+            if (!validator_1.default.isEmail(value)) {
+                throw new Error('Email is invalid');
+            }
+        }
     },
     password: {
         type: String,
-        require: true,
+        required: true,
+        unique: true,
+        trim: true,
+        minlength: 7,
+        validate(value) {
+            if (value.toLowerCase().includes('password')) {
+                throw new Error('password can not contain password');
+            }
+        }
     },
     role: {
         type: String,
@@ -67,39 +78,30 @@ exports.UserSchema = new mongoose_1.Schema({
     timestamps: true,
 });
 //adding password hasing
-exports.UserSchema.pre("save", function (next) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (this.isModified("password")) {
-            this.password = yield bcrypt.hash(this.password, 8);
-        }
-        next();
-    });
+exports.UserSchema.pre("save", async function (next) {
+    if (this.isModified("password")) {
+        this.password = await bcrypt.hash(this.password, 8);
+    }
+    next();
 });
 //finding user by email , role , password
-exports.UserSchema.statics.findUser = function (email, role, password) {
-    return __awaiter(this, void 0, void 0, function* () {
-        console.log('line 71 from user model');
-        console.log(email, role, password);
-        const user = yield exports.UserModel.findOne({ email, role });
-        if (!user) {
-            return 'User Not found';
-        }
-        console.log(password, user.password);
-        const isMatch = yield bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return 'Password dos not workable';
-        }
-        return user;
-    });
+exports.UserSchema.statics.findUser = async function (email, role, password) {
+    const user = await exports.UserModel.findOne({ email, role });
+    if (!user) {
+        return "User Not found";
+    }
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+        return "Password dos not workable";
+    }
+    return user;
 };
 // Generate a JWT token for the user
-exports.UserSchema.methods.generateAuthToken = function () {
-    return __awaiter(this, void 0, void 0, function* () {
-        const user = this; // Cast to User type
-        const token = jsonwebtoken_1.default.sign({ _id: user._id, role: user.role }, process.env.JWT_SECRET || "secret"); // Replace 'your-secret-key' with your actual secret key
-        user.tokens = user.tokens || [];
-        return token;
-    });
+exports.UserSchema.methods.generateAuthToken = async function () {
+    const user = this; // Cast to User type
+    const token = jsonwebtoken_1.default.sign({ _id: user._id, role: user.role }, process.env.JWT_SECRET || "secret"); // Replace 'your-secret-key' with your actual secret key
+    user.tokens = user.tokens || [];
+    return token;
 };
 //we don't share the password and token
 exports.UserSchema.methods.toJSON = function () {
@@ -109,4 +111,3 @@ exports.UserSchema.methods.toJSON = function () {
     return UserObject;
 };
 exports.UserModel = (0, mongoose_1.model)("User", exports.UserSchema, "user");
-//# sourceMappingURL=user.model.js.map
