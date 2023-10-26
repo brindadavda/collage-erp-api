@@ -19,7 +19,10 @@ studentRouter.post("/create", auth, StudentController.createStudent);
 studentRouter.get("/read", auth, StudentController.readStudents);
 
 //update a student data
-studentRouter.post("/update/:id", auth, StudentController.updateStudents);
+studentRouter.patch("/update/:id", auth, StudentController.updateStudents);
+
+//update student data
+// studentRouter.put("/update/", auth, StudentController.updateStudentsAttendance);
 
 //delete a student data
 studentRouter.delete("/delete/:id", auth, StudentController.deleteStudent);

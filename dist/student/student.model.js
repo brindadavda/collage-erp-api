@@ -33,9 +33,5 @@ exports.StudentSchema = new mongoose_1.Schema({
         type: Number,
         required: true,
     },
-    attendanceId: {
-        type: Object,
-        ref: 'batches'
-    },
 });
 exports.StudentModel = (0, mongoose_1.model)("Student", exports.StudentSchema, "students");

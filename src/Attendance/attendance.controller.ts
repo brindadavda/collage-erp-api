@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { StudentModel } from "../student/student.model";
+import { I_Student, StudentModel } from "../student/student.model";
 import { attendanceModel } from "./attendance.model";
 const faker = require('faker');
 
@@ -62,8 +62,6 @@ const generateDate = async (year: number) => {
   // req.body.branches.filter(async (student: I_Student) => {
   const findStudent = await StudentModel.find({ batch: year });
 
-  console.log(findStudent.length);
-
   if (findStudent.length === 0) {
     return {
       year: undefined,
@@ -76,13 +74,16 @@ const generateDate = async (year: number) => {
     const date = new Date(year, 0, day + 1); // Create a date for each day of the year
     const studentAttendance = findStudent.map((student) => ({
       studentId: student._id,
-      isPresent: faker.datatype.boolean(), // Randomly set student presence
+      isPresent: faker.datatype.boolean(),// Randomly set student presence
     }));
+
     return {
       date,
       student: studentAttendance,
     };
   });
+
+
 
   return {
     year,
@@ -144,9 +145,6 @@ export async function getAbsentStudents(req: Request, res: Response) {
   try {
     const { year, branch, semester, date } = req.query;
 
-    // Define a match object to filter the data based on the input parameters
-
-
     // Parse the date as a Date object
     const specificDate = new Date(date as string);
 
@@ -157,8 +155,7 @@ export async function getAbsentStudents(req: Request, res: Response) {
       },
       {
         $match: {
-          'attendance.date': specificDate,
-
+          'attendance.date': specificDate
         },
       },
       {
@@ -185,27 +182,197 @@ export async function getAbsentStudents(req: Request, res: Response) {
       },
     ]);
 
-    // const match: any = {};
-
     //
 
     const dataArray = [];
 
-    if (branch) {
-      // console.log(data.studentDetails.department === branch);
-      const data = attendanceData.forEach((data) => console.log((data.studentDetails[0].department) == branch))
-          
-
+    if (branch && semester) {
+      const data = attendanceData.filter((data) => {
+        if ((data.studentDetails[0].current_sem == semester) && (data.studentDetails[0].department === branch)) {
+          return data;
+        }
+      })
 
       dataArray.push(data);
+      return res.status(200).json(dataArray);
     }
-    // if (data.studentDetails.semester === semester) {
-    //   return data;
-    // }
-    // })
 
-    res.status(200).json(dataArray);
+
+    if (branch) {
+      const data = attendanceData.filter((data) => (data.studentDetails[0].department) === branch)
+      dataArray.push(data);
+
+      return res.status(200).json(dataArray);
+    }
+
+    if (semester) {
+      const data = attendanceData.filter((data) => data.studentDetails[0].current_sem == semester)
+      dataArray.push(data);
+
+      return res.status(200).json(dataArray);
+    }
+
+
+    res.status(200).json(attendanceData);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+}
+
+export async function getAttendanceLessthen75(req: Request, res: Response) {
+  try {
+    const { year, branch, semester, date } = req.query;
+
+    const pipeline = [];
+
+    if (year) {
+      pipeline.push({
+        $match: {
+          'year': parseInt(year.toString())
+        }
+      })
+    }
+
+    pipeline.push({
+      $unwind: '$attendance',
+    },
+      {
+        $unwind: '$attendance.student', // Only consider absent students'
+      },
+      {
+        $match: {
+          $and: [{
+            'attendance.student.isPresent': true
+          }, {
+            'attendance.date': { $lte: new Date(date as string) }
+          }], // Only consider absent students
+        },
+      },
+      {
+        $group: {
+          _id: '$attendance.student.studentId',
+          totalPresent: {
+            $sum: 1
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: "students", // Name of the student collection
+          localField: "_id", // Field in attendanceModel
+          foreignField: "_id", // Field in StudentModel
+          as: "studentDetails", // Name of the field to store student details
+        }
+      },
+      {
+        $project: {
+          '_id': 0,
+          studentId: '$_id',
+          'totalPresent': 1,
+          'studentDetails': 1
+        },
+      },)
+
+    // Use the date to find attendance data for the specific day
+    const attendanceData = await attendanceModel.aggregate(pipeline);
+
+    // const studentData = await StudentModel.aggregate(pipeline);
+
+    const studentsWithLowAttendance = attendanceData.filter((data) => {
+      const totalDays = 365;
+      const presentDays = data.totalPresent;
+      const attendancePercentage = (presentDays / totalDays) * 100;
+      return attendancePercentage < 75;
+    });
+
+    if (branch && semester) {
+      const data = studentsWithLowAttendance.filter((data) => (data.studentDetails[0].department === branch) && (data.studentDetails[0].current_sem == semester));
+      return res.send(data);
+    }
+
+    if (branch) {
+      const data = studentsWithLowAttendance.filter((data) => data.studentDetails[0].department === branch);
+      return res.send(data);
+    }
+
+    if (semester) {
+      const data = studentsWithLowAttendance.filter((data) => data.studentDetails[0].current_sem == semester);
+      return res.send(data);
+    }
+
+
+
+
+    res.status(200).json(studentsWithLowAttendance);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+
+}
+
+
+export async function getVacantSeatsYearWise(req: Request, res: Response) {
+  try {
+    // Get the batch and branch from the request query (if provided)
+    const { batch, branch } = req.query;
+
+    // Define the aggregation pipeline for calculating vacant seats
+    const pipeline = [];
+
+    // Match stage to filter by batch and branch (if provided)
+    pipeline.push({
+      $group: {
+        _id: '$department',
+        total: {
+          $sum: 1
+        }
+      }
+    })
+
+    //getting 
+    // [
+    //   {
+    //       "_id": "E.E",
+    //       "total": 53
+    //   },
+    // ]
+    const toalStudentBranchWise = await StudentModel.aggregate(pipeline);
+
+    const pipeline2 = [
+      {
+        $unwind:
+          {
+            path: "$branches",
+          },
+      },
+      {
+        $project:
+          {
+            _id: 0,
+            branches: 1,
+          },
+      },
+    ];
+
+    //getting 
+    // [
+    //   {
+    //       "branches": {
+    //           "name": "C.E",
+    //           "totalStudentsIntake": 162,
+    //           "_id": "653a29410bf3376b6296fd1b"
+    //       }
+    //   },
+    // ]
+    const branchWiseTotalStudentIntake = await attendanceModel.aggregate(pipeline2)
+
+    
+
+    // Execute the aggregation pipeline
+    const vacantSeats = await StudentModel.find({});
+
+    return res.status(200).json(branchWiseTotalStudentIntake);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
   }
 }

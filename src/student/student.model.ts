@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { Schema, model } from "mongoose";
+import mongoose, { Schema, model } from "mongoose";
 import validator from "validator";
 
 //creating interface for student
@@ -9,7 +9,7 @@ export interface I_Student {
   department: string;
   batch: number;
   current_sem: number;
-  attendanceId : object
+  
 }
 
 export const StudentSchema = new Schema<I_Student>({
@@ -38,10 +38,7 @@ export const StudentSchema = new Schema<I_Student>({
     type: Number,
     required: true,
   },
-  attendanceId: {
-    type : Object,
-    ref : 'batches'
-  },
+  
 });
 
 export const StudentModel = model<I_Student>(

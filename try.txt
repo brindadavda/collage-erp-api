@@ -1,0 +1,11 @@
+attendanceId: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Attendance'
+}]
+
+attendanceId ?: student[]
+
+export type student = {
+    studentId: mongoose.Types.ObjectId; // Correct the data type
+    isPresent: boolean; // Correct the data type
+}

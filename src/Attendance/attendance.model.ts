@@ -1,7 +1,7 @@
 /* eslint-disable */
 import mongoose, { Schema, Document, model } from "mongoose";
 
-export interface I_Analytics extends Document {
+export interface I_Attendance extends Document {
     year: number;
     branches: branche[];
     attendance: attend[];
@@ -22,7 +22,7 @@ export type student = {
     isPresent: false
 }
 
-export const AnalyticsSchema = new Schema<I_Analytics>({
+export const AnalyticsSchema = new Schema<I_Attendance>({
     year: {
         type: Number,
         require: true,
@@ -52,7 +52,7 @@ export const AnalyticsSchema = new Schema<I_Analytics>({
     }]
 });
 
-export const attendanceModel = model<I_Analytics>(
+export const attendanceModel = model<I_Attendance>(
     "Attendance",
     AnalyticsSchema,
     "attendance",

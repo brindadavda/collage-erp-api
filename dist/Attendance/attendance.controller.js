@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAbsentStudents = exports.query1 = exports.createAttendanceData = void 0;
+exports.getVacantSeatsYearWise = exports.getAttendanceLessthen75 = exports.getAbsentStudents = exports.query1 = exports.createAttendanceData = void 0;
 const student_model_1 = require("../student/student.model");
 const attendance_model_1 = require("./attendance.model");
 const faker = require('faker');
@@ -53,7 +53,6 @@ exports.createAttendanceData = createAttendanceData;
 const generateDate = async (year) => {
     // req.body.branches.filter(async (student: I_Student) => {
     const findStudent = await student_model_1.StudentModel.find({ batch: year });
-    console.log(findStudent.length);
     if (findStudent.length === 0) {
         return {
             year: undefined,
@@ -129,7 +128,6 @@ exports.query1 = query1;
 async function getAbsentStudents(req, res) {
     try {
         const { year, branch, semester, date } = req.query;
-        // Define a match object to filter the data based on the input parameters
         // Parse the date as a Date object
         const specificDate = new Date(date);
         // Use the date to find attendance data for the specific day
@@ -139,7 +137,7 @@ async function getAbsentStudents(req, res) {
             },
             {
                 $match: {
-                    'attendance.date': specificDate,
+                    'attendance.date': specificDate
                 },
             },
             {
@@ -165,22 +163,150 @@ async function getAbsentStudents(req, res) {
                 },
             },
         ]);
-        // const match: any = {};
         //
         const dataArray = [];
-        if (branch) {
-            // console.log(data.studentDetails.department === branch);
-            const data = attendanceData.forEach((data) => console.log((data.studentDetails[0].department) == branch));
+        if (branch && semester) {
+            const data = attendanceData.filter((data) => {
+                if ((data.studentDetails[0].current_sem == semester) && (data.studentDetails[0].department === branch)) {
+                    return data;
+                }
+            });
             dataArray.push(data);
+            return res.status(200).json(dataArray);
         }
-        // if (data.studentDetails.semester === semester) {
-        //   return data;
-        // }
-        // })
-        res.status(200).json(dataArray);
+        if (branch) {
+            const data = attendanceData.filter((data) => (data.studentDetails[0].department) === branch);
+            dataArray.push(data);
+            return res.status(200).json(dataArray);
+        }
+        if (semester) {
+            const data = attendanceData.filter((data) => data.studentDetails[0].current_sem == semester);
+            dataArray.push(data);
+            return res.status(200).json(dataArray);
+        }
+        res.status(200).json(attendanceData);
     }
     catch (error) {
         res.status(500).json({ error: error.message });
     }
 }
 exports.getAbsentStudents = getAbsentStudents;
+async function getAttendanceLessthen75(req, res) {
+    try {
+        const { year, branch, semester, date } = req.query;
+        const pipeline = [];
+        if (year) {
+            pipeline.push({
+                $match: {
+                    'year': parseInt(year.toString())
+                }
+            });
+        }
+        pipeline.push({
+            $unwind: '$attendance',
+        }, {
+            $unwind: '$attendance.student', // Only consider absent students'
+        }, {
+            $match: {
+                $and: [{
+                        'attendance.student.isPresent': true
+                    }, {
+                        'attendance.date': { $lte: new Date(date) }
+                    }], // Only consider absent students
+            },
+        }, {
+            $group: {
+                _id: '$attendance.student.studentId',
+                totalPresent: {
+                    $sum: 1
+                }
+            }
+        }, {
+            $lookup: {
+                from: "students",
+                localField: "_id",
+                foreignField: "_id",
+                as: "studentDetails", // Name of the field to store student details
+            }
+        }, {
+            $project: {
+                '_id': 0,
+                studentId: '$_id',
+                'totalPresent': 1,
+                'studentDetails': 1
+            },
+        });
+        // Use the date to find attendance data for the specific day
+        const attendanceData = await attendance_model_1.attendanceModel.aggregate(pipeline);
+        // const studentData = await StudentModel.aggregate(pipeline);
+        const studentsWithLowAttendance = attendanceData.filter((data) => {
+            const totalDays = 365;
+            const presentDays = data.totalPresent;
+            const attendancePercentage = (presentDays / totalDays) * 100;
+            return attendancePercentage < 75;
+        });
+        if (branch && semester) {
+            const data = studentsWithLowAttendance.filter((data) => (data.studentDetails[0].department === branch) && (data.studentDetails[0].current_sem == semester));
+            return res.send(data);
+        }
+        if (branch) {
+            const data = studentsWithLowAttendance.filter((data) => data.studentDetails[0].department === branch);
+            return res.send(data);
+        }
+        if (semester) {
+            const data = studentsWithLowAttendance.filter((data) => data.studentDetails[0].current_sem == semester);
+            return res.send(data);
+        }
+        res.status(200).json(studentsWithLowAttendance);
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+exports.getAttendanceLessthen75 = getAttendanceLessthen75;
+async function getVacantSeatsYearWise(req, res) {
+    try {
+        // Get the batch and branch from the request query (if provided)
+        const { batch, branch } = req.query;
+        // Define the aggregation pipeline for calculating vacant seats
+        const pipeline = [];
+        // Match stage to filter by batch and branch (if provided)
+        pipeline.push({
+            $group: {
+                _id: '$department',
+                total: {
+                    $sum: 1
+                }
+            }
+        });
+        //getting 
+        // [
+        //   {
+        //       "_id": "E.E",
+        //       "total": 53
+        //   },
+        // ]
+        const toalStudentBranchWise = await student_model_1.StudentModel.aggregate(pipeline);
+        const pipeline2 = [
+            {
+                $unwind: {
+                    path: "$branches",
+                },
+            },
+            {
+                $project: {
+                    _id: 0,
+                    branches: 1,
+                },
+            },
+        ];
+        const branchWiseTotalStudentIntake = await attendance_model_1.attendanceModel.aggregate(pipeline2);
+        // Execute the aggregation pipeline
+        const vacantSeats = await student_model_1.StudentModel.find({});
+        return res.status(200).json(branchWiseTotalStudentIntake);
+    }
+    catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+}
+exports.getVacantSeatsYearWise = getVacantSeatsYearWise;

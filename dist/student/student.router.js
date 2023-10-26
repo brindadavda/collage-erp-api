@@ -19,6 +19,8 @@ exports.studentRouter.post("/create", auth_1.default, student_controllers_1.defa
 //read a student data
 exports.studentRouter.get("/read", auth_1.default, student_controllers_1.default.readStudents);
 //update a student data
-exports.studentRouter.post("/update/:id", auth_1.default, student_controllers_1.default.updateStudents);
+exports.studentRouter.patch("/update/:id", auth_1.default, student_controllers_1.default.updateStudents);
+//update student data
+// studentRouter.put("/update/", auth, StudentController.updateStudentsAttendance);
 //delete a student data
 exports.studentRouter.delete("/delete/:id", auth_1.default, student_controllers_1.default.deleteStudent);
