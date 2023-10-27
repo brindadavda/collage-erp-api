@@ -1,7 +1,12 @@
 /* eslint-disable */
-import jwt, { JwtPayload } from "jsonwebtoken";
+import * as fs from 'fs';
+import { join } from 'path';
+import * as jwt from "jsonwebtoken";
 import { NextFunction, Request, Response } from "express";
 import { UserModel, I_User } from "../components/user/user.model";
+import { findUserByIdAndToken } from '../components/user/user.DAL';
+import USER_ERROR_CODES from '../components/user/user.errors';
+import HttpException from './error.utils';
 /**
  * Description placeholder
  * @date 10/23/2023 - 12:33:47 PM
@@ -33,35 +38,68 @@ const auth =
 
     //auth header null
     if (!authHeader) {
-      return res.status(401).json("No authorization header found");
+      return next(
+        new HttpException(
+          401,
+          USER_ERROR_CODES.AUTH_HEADER_NOT_FOUND,
+          'UNAUTHENTICATED',
+          null,
+        ),
+      )
     }
 
     //getting token from header
     const token = authHeader.split(" ")[1];
 
+    if (!token) {
+      return next(
+        new HttpException(
+          401,
+          USER_ERROR_CODES.USERS_NOT_FOUND,
+          'UNAUTHENTICATED',
+          null,
+        ),
+      );
+    }
+
+    const privateKey = fs.readFileSync(
+      join(__dirname, '../../keys/Private.key'),
+    );
+
     //verify the token
     try {
       const decoded = jwt.verify(
         token,
-        process.env.JWT_SECRET || "secret",
+        privateKey,
       ) as I_User;
 
-      const user = await UserModel.findOne({
-        _id: decoded._id,
-        "tokens.token": token,
-      });
+      const user = await findUserByIdAndToken(decoded._id , token);
 
       if (!user) {
-        throw new Error();
+        return next(
+          new HttpException(
+            401,
+            USER_ERROR_CODES.UNAUTHENTICATED,
+            'UNAUTHENTICATED',
+            null,
+          ),
+        );
       }
 
       req.user = user;
       req.token = token;
-      req.role = decoded as JwtPayload["role"];
+      req.role = decoded as jwt.JwtPayload["role"];
 
       next();
     } catch (err) {
-      return res.status(401).json("Invalid token");
+      return next(
+        new HttpException(
+          401,
+          USER_ERROR_CODES.UNAUTHENTICATED,
+          'UNAUTHENTICATED',
+          null,
+        ),
+      );
     }
   };
 

@@ -3,7 +3,7 @@ import express from "express";
 
 /* eslint-disable */
 import "./db/mongooseConn";
-import { logger } from "./utils/log";
+import { logger } from "./utils/winston-logger";
 
 /* eslint-disable */
 import { userRouter } from "./components/user/user.router";
@@ -26,5 +26,4 @@ app.use("/attendance", attendanceRouter);
 
 app.listen(3000, () => {
   logger.info(`server running on localhost:${PORT}`);
-  console.log(`server is running on localhost:${PORT}`);
 });

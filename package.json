@@ -11,6 +11,8 @@
     "lint:fix": "eslint --fix .",
     "format:check": "prettier --check .",
     "format:write": "prettier --write .",
+    "precommit": "npm run lint:fix && npm run format:write",
+    "prepush": "npm run lint",
     "prepare": "husky install"
   },
   "keywords": [],

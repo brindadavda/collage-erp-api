@@ -5,6 +5,7 @@ import { UserModel } from "./user.model";
 import { JwtRequest } from "utils/auth";
 /* eslint-disable */
 import bcrypt from "bcryptjs";
+import { createNewUser, findUserByEmailAndRole } from "./user.DAL";
 
 /**
  * Description placeholder
@@ -34,20 +35,14 @@ class UserController {
         return res.send("Please provide user details");
       }
 
-      const findUser = await UserModel.findOne({
-        email: req.body.email,
-        role: req.body.role,
-      });
+      const findUser = await findUserByEmailAndRole(req.body.email , req.body.role);
 
       if (findUser) {
         return res.status(400).send("User already created");
       }
 
-      // Create a new instance of UserModel
-      const user = new UserModel(userData);
-
-      // Save the user to the database
-      await user.save();
+      // Create a new user 
+      const user = await createNewUser(req.body);
 
       res.status(201).send(user);
     } catch (error) {
@@ -123,11 +118,9 @@ class UserController {
         (token) => token.token !== req.token,
       );
 
-      console.log(req.user);
-
       await req.user.save();
 
-      res.send("Successfully Logout");
+      return res.status(200).send({ data: req.user });
     } catch (e) {
       res.status(500).send(e.toString());
     }

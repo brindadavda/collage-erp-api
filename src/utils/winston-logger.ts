@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { createLogger, transports, format } from "winston";
 
-export const logger = createLogger({
+const logger = createLogger({
   transports: [
     new transports.File({
       dirname: "logs",
@@ -18,3 +18,5 @@ export const logger = createLogger({
     service: "ServerWorking",
   },
 });
+
+export const log = logger;

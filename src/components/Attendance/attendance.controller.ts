@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { StudentModel } from "../student/student.model";
 import { attendanceModel } from "./attendance.model";
 
+//query 1
 export async function query1(req: Request, res: Response) {
   const findData = await StudentModel.aggregate([
     {
@@ -37,6 +38,7 @@ export async function query1(req: Request, res: Response) {
   res.send(findData);
 }
 
+//query 2
 export async function getAbsentStudents(req: Request, res: Response) {
   try {
     const { branch, semester, date } = req.query;
@@ -120,6 +122,7 @@ export async function getAbsentStudents(req: Request, res: Response) {
   }
 }
 
+//query 3
 export async function getAttendanceLessthen75(req: Request, res: Response) {
   try {
     const { year, branch, semester, date } = req.query;
@@ -220,6 +223,7 @@ export async function getAttendanceLessthen75(req: Request, res: Response) {
   }
 }
 
+//query 4
 export async function getVacantSeatsYearWise(req: Request, res: Response) {
   // Function to get vacant seats year-wise
   // First, calculate the totalStudents and totalStudentsIntake for the specified year and branch
