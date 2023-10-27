@@ -23,36 +23,42 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.attendanceModel = exports.AnalyticsSchema = void 0;
+exports.attendanceModel = exports.attendanceSchema = void 0;
 /* eslint-disable */
 const mongoose_1 = __importStar(require("mongoose"));
-exports.AnalyticsSchema = new mongoose_1.Schema({
+exports.attendanceSchema = new mongoose_1.Schema({
     year: {
         type: Number,
         require: true,
         unique: true,
-        ref: 'Student'
+        ref: "Student",
     },
-    branches: [{
+    branches: [
+        {
             name: {
                 type: String,
             },
             totalStudentsIntake: {
                 type: Number,
             },
-        }],
-    attendance: [{
+        },
+    ],
+    attendance: [
+        {
             date: Date,
-            student: [{
+            student: [
+                {
                     studentId: {
                         type: mongoose_1.default.Types.ObjectId,
-                        ref: 'Student'
+                        ref: "Student",
                     },
                     isPresent: {
                         type: Boolean,
                         default: false,
-                    }
-                }]
-        }]
+                    },
+                },
+            ],
+        },
+    ],
 });
-exports.attendanceModel = (0, mongoose_1.model)("Attendance", exports.AnalyticsSchema, "attendance");
+exports.attendanceModel = (0, mongoose_1.model)("Attendance", exports.attendanceSchema, "attendance");

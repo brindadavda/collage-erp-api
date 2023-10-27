@@ -1,8 +1,7 @@
-/* eslint-disable */
 import { model, Schema, Document, Model } from "mongoose";
 import * as bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { JwtRequest } from "../utils/auth";
+import { JwtRequest } from "../../utils/auth";
 import validator from "validator";
 
 export interface I_User extends Document {
@@ -38,31 +37,31 @@ export const UserSchema: Schema = new Schema<I_User, I_User_Static_Methods>(
       type: String,
       required: true,
       trim: true,
-  },
-  email: {
+    },
+    email: {
       type: String,
       unique: true,
       required: true,
       lowercase: true,
       trim: true,
-      validate(value : string) {
-          if (!validator.isEmail(value)) {
-              throw new Error('Email is invalid');
-          }
-      }
-  },
-  password: {
+      validate(value: string) {
+        if (!validator.isEmail(value)) {
+          throw new Error("Email is invalid");
+        }
+      },
+    },
+    password: {
       type: String,
       required: true,
       unique: true,
       trim: true,
       minlength: 7,
-      validate(value : string) {
-          if (value.toLowerCase().includes('password')) {
-              throw new Error('password can not contain password');
-          }
-      }
-  },
+      validate(value: string) {
+        if (value.toLowerCase().includes("password")) {
+          throw new Error("password can not contain password");
+        }
+      },
+    },
     role: {
       type: String,
       require: true,

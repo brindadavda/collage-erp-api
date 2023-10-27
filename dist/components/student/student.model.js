@@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.StudentModel = exports.StudentSchema = void 0;
-/* eslint-disable */
 const mongoose_1 = require("mongoose");
 const validator_1 = __importDefault(require("validator"));
 exports.StudentSchema = new mongoose_1.Schema({
@@ -17,9 +16,9 @@ exports.StudentSchema = new mongoose_1.Schema({
         type: Number,
         validate(value) {
             if (!validator_1.default.isMobilePhone(value.toString())) {
-                throw new Error('Phone number is invalid');
+                throw new Error("Phone number is invalid");
             }
-        }
+        },
     },
     department: {
         type: String,

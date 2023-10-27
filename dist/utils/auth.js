@@ -5,8 +5,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 /* eslint-disable */
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const user_model_1 = require("../user/user.model");
-const auth = /**
+const user_model_1 = require("../components/user/user.model");
+const auth = 
+/**
  * Description placeholder
  * @date 10/23/2023 - 12:33:54 PM
  *
@@ -15,7 +16,8 @@ const auth = /**
  * @param {Response} res
  * @param {NextFunction} next
  * @returns {unknown}
- */ async (req, res, next) => {
+ */
+async (req, res, next) => {
     const authHeader = req.headers.authorization;
     //auth header null
     if (!authHeader) {

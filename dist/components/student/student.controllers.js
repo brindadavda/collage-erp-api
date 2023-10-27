@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-/* eslint-disable */
 const student_middleware_1 = require("./student.middleware");
 const student_model_1 = require("./student.model");
 class StudentController {
@@ -62,53 +61,6 @@ class StudentController {
         }
         return res.send(`Forbidden, you are a ${req.role} and this service is only available for STAFF OR ADMIN`);
     }
-    //update the student attendance data
-    // static async updateStudentsAttendance(req: JwtRequest, res: Response) {
-    //   const valid = checkRole(req.user.role);
-    //   if (valid) {
-    //     //check for the property is correct or not
-    //     try {
-    //       // Use the date to find attendance data for the specific day
-    //       const attendanceData = await attendanceModel.aggregate([
-    //         {
-    //           $unwind: '$attendance',
-    //         },
-    //         {
-    //           $unwind: '$attendance.student', // Only consider absent students'
-    //         },
-    //         {
-    //           $match: {
-    //             'attendance.student.isPresent': true, // Only consider absent students
-    //           },
-    //         },
-    //         {
-    //           $project: {
-    //             '_id': 0,
-    //             'attendance.student': 1
-    //           },
-    //         }
-    //       ]);
-    //       await StudentModel.updateMany(
-    //         {},
-    //         { $unset: { attendanceId: 1 } } // Use new ObjectId("1") to create an ObjectId
-    //       );
-    //       // { $push: { attendanceId: data.attendance.student._id } }
-    //       attendanceData.forEach(async (data) => {
-    //         try {
-    //           const student = await StudentModel.updateOne({ _id : data.attendance.student.studentId} , {} );
-    //           // if (student) {
-    //           //  console.log(student);
-    //           // }
-    //         } catch (error) {
-    //           console.error("Error updating student's attendance:", error);
-    //         }
-    //       // })
-    //       return res.send('Updated');
-    //     } catch (error) {
-    //       return res.send({ error });
-    //     }
-    //   }
-    //   }}
     //delete the student data
     static async deleteStudent(req, res) {
         const valid = (0, student_middleware_1.checkRole)(req.user.role);

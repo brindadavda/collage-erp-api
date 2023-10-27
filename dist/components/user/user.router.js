@@ -4,9 +4,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.userRouter = void 0;
-/* eslint-disable */
 const express_1 = require("express");
-const auth_1 = __importDefault(require("../utils/auth"));
+const auth_1 = __importDefault(require("../../utils/auth"));
 const user_controllers_1 = __importDefault(require("./user.controllers"));
 exports.userRouter = (0, express_1.Router)();
 //testing purpose

@@ -9,19 +9,22 @@ const express_1 = __importDefault(require("express"));
 require("./db/mongooseConn");
 const log_1 = require("./utils/log");
 /* eslint-disable */
-const user_router_1 = require("./user/user.router");
+const user_router_1 = require("./components/user/user.router");
 /* eslint-disable */
-const student_router_1 = require("./student/student.router");
+const student_router_1 = require("./components/student/student.router");
 /* eslint-disable */
-const attendance_router_1 = require("./Attendance/attendance.router");
+const attendance_router_1 = require("./components/Attendance/attendance.router");
 const app = (0, express_1.default)();
-const port = parseInt(process.env.PORT) || 3000;
+const PORT = 4000;
+app.listen(PORT, () => {
+    log_1.logger.info("Server is running on port", PORT);
+});
 app.use(express_1.default.json());
 //set all the routers
 app.use("/user", user_router_1.userRouter);
 app.use("/student", student_router_1.studentRouter);
-app.use("/attendance", attendance_router_1.analyticsRouter);
-app.listen(port, "0.0.0.0", () => {
-    log_1.logger.info(`server running on localhost:${port}`);
-    console.log(`server is running on localhost:${port}`);
+app.use("/attendance", attendance_router_1.attendanceRouter);
+app.listen(3000, () => {
+    log_1.logger.info(`server running on localhost:${PORT}`);
+    console.log(`server is running on localhost:${PORT}`);
 });

@@ -2,7 +2,7 @@
 import { Request, Response } from "express";
 /* eslint-disable */
 import { UserModel } from "./user.model";
-import { JwtRequest } from "../utils/auth";
+import { JwtRequest } from "utils/auth";
 /* eslint-disable */
 import bcrypt from "bcryptjs";
 
@@ -51,7 +51,7 @@ class UserController {
 
       res.status(201).send(user);
     } catch (error) {
-      res.status(500).send({error : error.message});
+      res.status(500).send({ error: error.message });
     }
   }
 
@@ -102,7 +102,7 @@ class UserController {
         return res.status(400).send("Invalid password");
       }
     } catch (error) {
-      return res.status(500).send({error : error.message});
+      return res.status(500).send({ error: error.message });
     }
   }
 

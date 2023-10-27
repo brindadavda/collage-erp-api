@@ -27,7 +27,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserModel = exports.UserSchema = void 0;
-/* eslint-disable */
 const mongoose_1 = require("mongoose");
 const bcrypt = __importStar(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
@@ -46,9 +45,9 @@ exports.UserSchema = new mongoose_1.Schema({
         trim: true,
         validate(value) {
             if (!validator_1.default.isEmail(value)) {
-                throw new Error('Email is invalid');
+                throw new Error("Email is invalid");
             }
-        }
+        },
     },
     password: {
         type: String,
@@ -57,10 +56,10 @@ exports.UserSchema = new mongoose_1.Schema({
         trim: true,
         minlength: 7,
         validate(value) {
-            if (value.toLowerCase().includes('password')) {
-                throw new Error('password can not contain password');
+            if (value.toLowerCase().includes("password")) {
+                throw new Error("password can not contain password");
             }
-        }
+        },
     },
     role: {
         type: String,
